@@ -1,6 +1,7 @@
 package io.github.ultimateboomer.resolutioncontrol.client.gui.screen;
 
 import io.github.ultimateboomer.resolutioncontrol.ResolutionControlMod;
+import io.github.ultimateboomer.resolutioncontrol.util.Config;
 import io.github.ultimateboomer.resolutioncontrol.util.RCUtil;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
@@ -112,10 +113,10 @@ public final class MainSettingsScreen extends SettingsScreen {
 
     upscaleAlgoButton =
         new ButtonWidget.Builder(
-                mod.getUpscaleAlgorithm().getText(),
+                Config.getUpscaleAlgorithm().getText(),
                 button -> {
                   mod.nextUpscaleAlgorithm();
-                  button.setMessage(mod.getUpscaleAlgorithm().getText());
+                  button.setMessage(Config.getUpscaleAlgorithm().getText());
                 })
             .dimensions(centerX + 15, centerY - 28, 60, buttonSize)
             .build();
@@ -123,10 +124,10 @@ public final class MainSettingsScreen extends SettingsScreen {
 
     downscaleAlgoButton =
         new ButtonWidget.Builder(
-                mod.getDownscaleAlgorithm().getText(),
+                Config.getDownscaleAlgorithm().getText(),
                 button -> {
                   mod.nextDownscaleAlgorithm();
-                  button.setMessage(mod.getDownscaleAlgorithm().getText());
+                  button.setMessage(Config.getDownscaleAlgorithm().getText());
                 })
             .dimensions(centerX + 15, centerY + 8, 60, buttonSize)
             .build();
@@ -161,7 +162,7 @@ public final class MainSettingsScreen extends SettingsScreen {
           context,
           String.format(
               "\u00a7%s%s\u00a7rx",
-              mod.getScaleFactor() > redValue ? "4" : "0", mod.getScaleFactor()),
+              Config.getScaleFactor() > redValue ? "4" : "0", Config.getScaleFactor()),
           centerX - 55,
           centerY - 36,
           0x000000);
@@ -219,7 +220,7 @@ public final class MainSettingsScreen extends SettingsScreen {
   }
 
   private void changeScaleFactor(boolean add) {
-    float currentScale = mod.getScaleFactor();
+    float currentScale = Config.getScaleFactor();
     int nextIndex = ArrayUtils.indexOf(scaleValues, currentScale);
     if (nextIndex == -1) {
       for (int i = -1; i < scaleValues.length; ++i) {
@@ -241,14 +242,14 @@ public final class MainSettingsScreen extends SettingsScreen {
   }
 
   private void updateButtons() {
-    increaseButton.active = mod.getScaleFactor() < scaleValues[scaleValues.length - 1];
-    decreaseButton.active = mod.getScaleFactor() > scaleValues[0];
+    increaseButton.active = Config.getScaleFactor() < scaleValues[scaleValues.length - 1];
+    decreaseButton.active = Config.getScaleFactor() > scaleValues[0];
   }
 
   public void setManualEntry(boolean manualEntry, boolean cancel) {
     this.manualEntry = manualEntry;
     if (manualEntry) {
-      entryTextField.setText(String.valueOf(mod.getScaleFactor()));
+      entryTextField.setText(String.valueOf(Config.getScaleFactor()));
       entryTextField.setVisible(true);
       entryTextField.setSelectionStart(0);
       entryTextField.setSelectionEnd(entryTextField.getText().length());

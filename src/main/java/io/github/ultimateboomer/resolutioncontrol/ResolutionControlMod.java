@@ -69,6 +69,8 @@ public class ResolutionControlMod implements ModInitializer {
   public void onInitialize() {
     instance = this;
 
+    Config.loadConfig();
+
     settingsKey =
         KeyBindingHelper.registerKeyBinding(
             new KeyBinding(
@@ -137,34 +139,22 @@ public class ResolutionControlMod implements ModInitializer {
     return framebuffer;
   }
 
-  public float getScaleFactor() {
-    return Config.getInstance().scaleFactor;
-  }
-
   public void setScaleFactor(float scaleFactor) {
-    Config.getInstance().scaleFactor = scaleFactor;
+    Config.setScaleFactor(scaleFactor);
 
     updateFramebufferSize();
-
-    ConfigHandler.instance.saveConfig();
-  }
-
-  public ScalingAlgorithm getUpscaleAlgorithm() {
-    return Config.getInstance().upscaleAlgorithm;
   }
 
   public void setUpscaleAlgorithm(ScalingAlgorithm algorithm) {
-    if (algorithm == Config.getInstance().upscaleAlgorithm) return;
+    if (algorithm == Config.getUpscaleAlgorithm()) return;
 
-    Config.getInstance().upscaleAlgorithm = algorithm;
+    Config.setUpscaleAlgorithm(algorithm);
 
     onResolutionChanged();
-
-    ConfigHandler.instance.saveConfig();
   }
 
   public void nextUpscaleAlgorithm() {
-    ScalingAlgorithm currentAlgorithm = getUpscaleAlgorithm();
+    ScalingAlgorithm currentAlgorithm = Config.getUpscaleAlgorithm();
     if (currentAlgorithm.equals(ScalingAlgorithm.NEAREST)) {
       setUpscaleAlgorithm(ScalingAlgorithm.LINEAR);
     } else {
@@ -172,22 +162,16 @@ public class ResolutionControlMod implements ModInitializer {
     }
   }
 
-  public ScalingAlgorithm getDownscaleAlgorithm() {
-    return Config.getInstance().downscaleAlgorithm;
-  }
-
   public void setDownscaleAlgorithm(ScalingAlgorithm algorithm) {
-    if (algorithm == Config.getInstance().downscaleAlgorithm) return;
+    if (algorithm == Config.getDownscaleAlgorithm()) return;
 
-    Config.getInstance().downscaleAlgorithm = algorithm;
+    Config.setDownscaleAlgorithm(algorithm);
 
     onResolutionChanged();
-
-    ConfigHandler.instance.saveConfig();
   }
 
   public void nextDownscaleAlgorithm() {
-    ScalingAlgorithm currentAlgorithm = getDownscaleAlgorithm();
+    ScalingAlgorithm currentAlgorithm = Config.getDownscaleAlgorithm();
     if (currentAlgorithm.equals(ScalingAlgorithm.NEAREST)) {
       setDownscaleAlgorithm(ScalingAlgorithm.LINEAR);
     } else {
@@ -196,7 +180,7 @@ public class ResolutionControlMod implements ModInitializer {
   }
 
   public double getCurrentScaleFactor() {
-    return shouldScale ? Config.getInstance().scaleFactor : 1;
+    return shouldScale ? Config.getScaleFactor() : 1;
   }
 
   public void onResolutionChanged() {
@@ -283,10 +267,6 @@ public class ResolutionControlMod implements ModInitializer {
 
   public boolean isOptifineInstalled() {
     return optifineInstalled;
-  }
-
-  public void saveSettings() {
-    ConfigHandler.instance.saveConfig();
   }
 
   public void setLastSettingsScreen(Class<? extends SettingsScreen> ordinal) {

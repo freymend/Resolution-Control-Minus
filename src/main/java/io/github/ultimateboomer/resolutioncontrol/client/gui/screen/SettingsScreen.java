@@ -2,6 +2,7 @@ package io.github.ultimateboomer.resolutioncontrol.client.gui.screen;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.github.ultimateboomer.resolutioncontrol.ResolutionControlMod;
+import io.github.ultimateboomer.resolutioncontrol.util.Config;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Function;
@@ -149,7 +150,7 @@ public class SettingsScreen extends Screen {
   }
 
   protected void applySettingsAndCleanup() {
-    mod.saveSettings();
+    Config.saveConfig();
     mod.setLastSettingsScreen(this.getClass());
   }
 

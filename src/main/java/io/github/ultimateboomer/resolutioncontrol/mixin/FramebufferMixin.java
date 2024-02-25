@@ -29,7 +29,7 @@ public abstract class FramebufferMixin {
   @Inject(method = "initFbo", at = @At("HEAD"))
   private void onInitFbo(int width, int height, boolean getError, CallbackInfo ci) {
     scaleMultiplier = (float) width / MinecraftClient.getInstance().getWindow().getWidth();
-    isMipmapped = Config.getInstance().mipmapHighRes && scaleMultiplier > 2.0f;
+    isMipmapped = Config.getMipmapHighRes() && scaleMultiplier > 2.0f;
   }
 
   @Redirect(
@@ -43,10 +43,10 @@ public abstract class FramebufferMixin {
       GlStateManager._texParameter(
           target,
           pname,
-          ResolutionControlMod.getInstance().getUpscaleAlgorithm().getId(isMipmapped));
+          Config.getUpscaleAlgorithm().getId(isMipmapped));
     } else if (pname == GL11.GL_TEXTURE_MAG_FILTER) {
       GlStateManager._texParameter(
-          target, pname, ResolutionControlMod.getInstance().getDownscaleAlgorithm().getId(false));
+          target, pname, Config.getDownscaleAlgorithm().getId(false));
     } else if (pname == GL11.GL_TEXTURE_WRAP_S || pname == GL11.GL_TEXTURE_WRAP_T) {
       // Fix linear scaling creating black borders
       GlStateManager._texParameter(target, pname, GL12.GL_CLAMP_TO_EDGE);
