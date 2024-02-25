@@ -11,22 +11,21 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(WorldRenderer.class)
 public class WorldRendererMixin {
-    @Shadow
-    public Framebuffer entityOutlinesFramebuffer;
+  @Shadow public Framebuffer entityOutlinesFramebuffer;
 
-    @Inject(at = @At("RETURN"), method = "loadEntityOutlinePostProcessor")
-    private void onLoadEntityOutlineShader(CallbackInfo ci) {
-        ResolutionControlMod.getInstance().resizeMinecraftFramebuffers();
-    }
+  @Inject(at = @At("RETURN"), method = "loadEntityOutlinePostProcessor")
+  private void onLoadEntityOutlineShader(CallbackInfo ci) {
+    ResolutionControlMod.getInstance().resizeMinecraftFramebuffers();
+  }
 
-    @Inject(at = @At("RETURN"), method = "onResized")
-    private void onOnResized(CallbackInfo ci) {
-        if (entityOutlinesFramebuffer == null) return;
-        ResolutionControlMod.getInstance().resizeMinecraftFramebuffers();
-    }
+  @Inject(at = @At("RETURN"), method = "onResized")
+  private void onOnResized(CallbackInfo ci) {
+    if (entityOutlinesFramebuffer == null) return;
+    ResolutionControlMod.getInstance().resizeMinecraftFramebuffers();
+  }
 
-//    @Inject(at = @At("RETURN"), method = "loadTransparencyShader")
-//    private void onLoadTransparencyShader(CallbackInfo ci) {
-//        ResolutionControlMod.getInstance().resizeMinecraftFramebuffers();
-//    }
+  //    @Inject(at = @At("RETURN"), method = "loadTransparencyShader")
+  //    private void onLoadTransparencyShader(CallbackInfo ci) {
+  //        ResolutionControlMod.getInstance().resizeMinecraftFramebuffers();
+  //    }
 }

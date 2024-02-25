@@ -9,11 +9,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(MinecraftClient.class)
 public abstract class MinecraftClientMixin {
-	@Inject(method = "<init>", at = @At(value = "NEW", target = "(II)Lnet/minecraft/client/gl/WindowFramebuffer;"))
-	private void onInitFramebuffer(CallbackInfo ci) {
-		ResolutionControlMod mod = ResolutionControlMod.getInstance();
-		if (mod.isScreenshotFramebufferAlwaysAllocated()) {
-			mod.initScreenshotFramebuffer();
-		}
-	}
+  @Inject(
+      method = "<init>",
+      at = @At(value = "NEW", target = "(II)Lnet/minecraft/client/gl/WindowFramebuffer;"))
+  private void onInitFramebuffer(CallbackInfo ci) {
+    ResolutionControlMod mod = ResolutionControlMod.getInstance();
+    if (mod.isScreenshotFramebufferAlwaysAllocated()) {
+      mod.initScreenshotFramebuffer();
+    }
+  }
 }
