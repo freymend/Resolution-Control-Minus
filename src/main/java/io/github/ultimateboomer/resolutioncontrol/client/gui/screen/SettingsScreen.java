@@ -31,7 +31,6 @@ public class SettingsScreen extends Screen {
   static {
     screensSupplierList = new LinkedHashMap<>();
     screensSupplierList.put(MainSettingsScreen.class, MainSettingsScreen::new);
-    screensSupplierList.put(ScreenshotSettingsScreen.class, ScreenshotSettingsScreen::new);
     screensSupplierList.put(InfoSettingsScreen.class, InfoSettingsScreen::new);
   }
 

@@ -13,20 +13,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public abstract class WindowMixin {
   @Inject(at = @At("RETURN"), method = "getFramebufferWidth", cancellable = true)
   private void getFramebufferWidth(CallbackInfoReturnable<Integer> ci) {
-    if (ResolutionControlMod.getInstance().isScreenshotting()) {
-      ci.setReturnValue(ResolutionControlMod.getInstance().getScreenshotWidth());
-    } else {
-      ci.setReturnValue(scale(ci.getReturnValueI()));
-    }
+    ci.setReturnValue(scale(ci.getReturnValueI()));
   }
 
   @Inject(at = @At("RETURN"), method = "getFramebufferHeight", cancellable = true)
   private void getFramebufferHeight(CallbackInfoReturnable<Integer> ci) {
-    if (ResolutionControlMod.getInstance().isScreenshotting()) {
-      ci.setReturnValue(ResolutionControlMod.getInstance().getScreenshotHeight());
-    } else {
-      ci.setReturnValue(scale(ci.getReturnValueI()));
-    }
+    ci.setReturnValue(scale(ci.getReturnValueI()));
   }
 
   private int scale(int value) {

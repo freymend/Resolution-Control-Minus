@@ -28,24 +28,4 @@ public final class RCUtil {
         float result = (float) displayDigits / decimalPlace;
         return String.format("%s %s", FORMAT.format(result), UNITS[log10 / 3 - 1]);
     }
-
-    public static File getScreenshotFilename(File directory) {
-        String string = DATE_FORMAT.format(new Date());
-        int i = 1;
-
-        while (true) {
-            File file = new File(new File(""), "fb" + string + (i == 1 ? "" : "_" + i) + ".png");
-            File entireDirectory = new File(new File(directory, "screenshots"), file.toString());
-            if (!entireDirectory.exists()) {
-                try {
-                    entireDirectory.createNewFile();
-                } catch (IOException e) {
-                    throw new IllegalStateException(e);
-                }
-                return file;
-            }
-
-            ++i;
-        }
-    }
 }

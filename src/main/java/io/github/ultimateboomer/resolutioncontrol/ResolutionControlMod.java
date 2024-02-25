@@ -43,18 +43,14 @@ public class ResolutionControlMod implements ModInitializer {
     return instance;
   }
 
-  private static final String SCREENSHOT_PREFIX = "fb";
-
   private boolean optifineInstalled;
 
   private KeyBinding settingsKey;
-  private KeyBinding screenshotKey;
 
   private boolean shouldScale = false;
 
   @Nullable private Framebuffer framebuffer;
 
-  @Nullable private Framebuffer screenshotFrameBuffer;
 
   @Nullable private Framebuffer clientFramebuffer;
 
@@ -67,7 +63,6 @@ public class ResolutionControlMod implements ModInitializer {
 
   private long estimatedMemory;
 
-  private boolean screenshot = false;
 
   private int lastWidth;
   private int lastHeight;
@@ -84,31 +79,10 @@ public class ResolutionControlMod implements ModInitializer {
                 GLFW.GLFW_KEY_O,
                 "key.categories.resolutioncontrol"));
 
-    screenshotKey =
-        KeyBindingHelper.registerKeyBinding(
-            new KeyBinding(
-                "key.resolutioncontrol.screenshot",
-                InputUtil.Type.KEYSYM,
-                -1,
-                "key.categories.resolutioncontrol"));
-
     ClientTickEvents.END_CLIENT_TICK.register(
         client -> {
           while (settingsKey.wasPressed()) {
             client.setScreen(SettingsScreen.getScreen(lastSettingsScreen));
-          }
-        });
-
-    ClientTickEvents.END_CLIENT_TICK.register(
-        client -> {
-          while (screenshotKey.wasPressed()) {
-            if (getOverrideScreenshotScale()) {
-              this.screenshot = true;
-              client.player.sendMessage(
-                  Text.translatable("resolutioncontrol.screenshot.wait"), false);
-            } else {
-              saveScreenshot(framebuffer);
-            }
           }
         });
 
@@ -131,14 +105,6 @@ public class ResolutionControlMod implements ModInitializer {
     optifineInstalled = FabricLoader.getInstance().isModLoaded("optifabric");
   }
 
-  private void saveScreenshot(Framebuffer fb) {
-    ScreenshotRecorder.saveScreenshot(
-        client.runDirectory,
-        RCUtil.getScreenshotFilename(client.runDirectory).toString(),
-        fb,
-        text -> client.player.sendMessage(text, false));
-  }
-
   public void setShouldScale(boolean shouldScale) {
     if (shouldScale == this.shouldScale) return;
 
@@ -154,53 +120,19 @@ public class ResolutionControlMod implements ModInitializer {
 
     this.shouldScale = shouldScale;
 
-    client.getProfiler().swap(shouldScale ? "startScaling" : "finishScaling");
-
     // swap out framebuffers as needed
     if (shouldScale) {
       clientFramebuffer = client.getFramebuffer();
 
-      if (screenshot) {
-        resizeMinecraftFramebuffers();
+      setClientFramebuffer(framebuffer);
 
-        if (!isScreenshotFramebufferAlwaysAllocated() && screenshotFrameBuffer != null) {
-          screenshotFrameBuffer.delete();
-        }
-
-        if (screenshotFrameBuffer == null) {
-          initScreenshotFramebuffer();
-        }
-
-        setClientFramebuffer(screenshotFrameBuffer);
-
-        screenshotFrameBuffer.beginWrite(true);
-      } else {
-        setClientFramebuffer(framebuffer);
-
-        framebuffer.beginWrite(true);
-      }
-      // nothing on the client's framebuffer yet
+      framebuffer.beginWrite(true);
+    // nothing on the client's framebuffer yet
     } else {
       setClientFramebuffer(clientFramebuffer);
       client.getFramebuffer().beginWrite(true);
-
-      // Screenshot framebuffer
-      if (screenshot) {
-        saveScreenshot(screenshotFrameBuffer);
-
-        if (!isScreenshotFramebufferAlwaysAllocated()) {
-          screenshotFrameBuffer.delete();
-          screenshotFrameBuffer = null;
-        }
-
-        screenshot = false;
-        resizeMinecraftFramebuffers();
-      } else {
-        framebuffer.draw(window.getFramebufferWidth(), window.getFramebufferHeight());
-      }
+      framebuffer.draw(window.getFramebufferWidth(), window.getFramebufferHeight());
     }
-
-    client.getProfiler().swap("level");
   }
 
   public void initMinecraftFramebuffers() {
@@ -221,12 +153,6 @@ public class ResolutionControlMod implements ModInitializer {
 
   public Framebuffer getFramebuffer() {
     return framebuffer;
-  }
-
-  public void initScreenshotFramebuffer() {
-    if (Objects.nonNull(screenshotFrameBuffer)) screenshotFrameBuffer.delete();
-
-    screenshotFrameBuffer = new WindowFramebuffer(getScreenshotWidth(), getScreenshotHeight());
   }
 
   public float getScaleFactor() {
@@ -295,57 +221,6 @@ public class ResolutionControlMod implements ModInitializer {
         : 1;
   }
 
-  public boolean getOverrideScreenshotScale() {
-    return Config.getInstance().overrideScreenshotScale;
-  }
-
-  public void setOverrideScreenshotScale(boolean value) {
-    Config.getInstance().overrideScreenshotScale = value;
-    if (value && isScreenshotFramebufferAlwaysAllocated()) {
-      initScreenshotFramebuffer();
-    } else {
-      if (screenshotFrameBuffer != null) {
-        screenshotFrameBuffer.delete();
-        screenshotFrameBuffer = null;
-      }
-    }
-  }
-
-  public int getScreenshotWidth() {
-    return Math.max(Config.getInstance().screenshotWidth, 1);
-  }
-
-  public void setScreenshotWidth(int width) {
-    Config.getInstance().screenshotWidth = width;
-  }
-
-  public int getScreenshotHeight() {
-    return Math.max(Config.getInstance().screenshotHeight, 1);
-  }
-
-  public void setScreenshotHeight(int height) {
-    Config.getInstance().screenshotHeight = height;
-  }
-
-  public boolean isScreenshotFramebufferAlwaysAllocated() {
-    return Config.getInstance().screenshotFramebufferAlwaysAllocated;
-  }
-
-  public void setScreenshotFramebufferAlwaysAllocated(boolean value) {
-    Config.getInstance().screenshotFramebufferAlwaysAllocated = value;
-
-    if (value) {
-      if (getOverrideScreenshotScale() && Objects.isNull(this.screenshotFrameBuffer)) {
-        initScreenshotFramebuffer();
-      }
-    } else {
-      if (this.screenshotFrameBuffer != null) {
-        this.screenshotFrameBuffer.delete();
-        this.screenshotFrameBuffer = null;
-      }
-    }
-  }
-
   public void setEnableDynamicResolution(boolean enableDynamicResolution) {
     Config.getInstance().enableDynamicResolution = enableDynamicResolution;
   }
@@ -401,15 +276,10 @@ public class ResolutionControlMod implements ModInitializer {
 
     boolean prev = shouldScale;
     shouldScale = true;
-    if (screenshot) {
-      framebuffer.resize(
-          getScreenshotWidth(), getScreenshotHeight(), MinecraftClient.IS_SYSTEM_MAC);
-    } else {
-      framebuffer.resize(
-          getWindow().getFramebufferWidth(),
-          getWindow().getFramebufferHeight(),
-          MinecraftClient.IS_SYSTEM_MAC);
-    }
+    framebuffer.resize(
+        getWindow().getFramebufferWidth(),
+        getWindow().getFramebufferHeight(),
+        MinecraftClient.IS_SYSTEM_MAC);
     shouldScale = prev;
   }
 
@@ -435,10 +305,6 @@ public class ResolutionControlMod implements ModInitializer {
 
   public long getEstimatedMemory() {
     return estimatedMemory;
-  }
-
-  public boolean isScreenshotting() {
-    return screenshot;
   }
 
   public boolean isOptifineInstalled() {

@@ -8,13 +8,6 @@ public final class Config {
 
 	public boolean mipmapHighRes = false;
 
-	public boolean overrideScreenshotScale = true;
-
-	public int screenshotWidth = 3840;
-	public int screenshotHeight = 2160;
-
-	public boolean screenshotFramebufferAlwaysAllocated = false;
-
 	public boolean enableDynamicResolution = false;
 
 	public float drMinScale = 0.5f;
