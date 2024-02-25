@@ -8,15 +8,6 @@ public final class Config {
 
 	public boolean mipmapHighRes = false;
 
-	public boolean enableDynamicResolution = false;
-
-	public float drMinScale = 0.5f;
-	public float drMaxScale = 2.0f;
-	public float drResStep = 0.0625f;
-	public int drMinFps = 60;
-	public int drMaxFps = 70;
-	public int drFpsSmoothAmount = 10;
-
 	public static Config getInstance() {
 		return ConfigHandler.instance.getConfig();
 	}

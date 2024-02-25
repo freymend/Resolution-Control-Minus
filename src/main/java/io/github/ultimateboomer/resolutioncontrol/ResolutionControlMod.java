@@ -51,7 +51,6 @@ public class ResolutionControlMod implements ModInitializer {
 
   @Nullable private Framebuffer framebuffer;
 
-
   @Nullable private Framebuffer clientFramebuffer;
 
   private Set<Framebuffer> minecraftFramebuffers;
@@ -62,7 +61,6 @@ public class ResolutionControlMod implements ModInitializer {
   private int currentHeight;
 
   private long estimatedMemory;
-
 
   private int lastWidth;
   private int lastHeight;
@@ -83,22 +81,6 @@ public class ResolutionControlMod implements ModInitializer {
         client -> {
           while (settingsKey.wasPressed()) {
             client.setScreen(SettingsScreen.getScreen(lastSettingsScreen));
-          }
-        });
-
-    ClientTickEvents.END_CLIENT_TICK.register(
-        client -> {
-          if (ConfigHandler.instance.getConfig().enableDynamicResolution
-              && client.world != null
-              && getWindow().getX() != -32000) {
-            DynamicResolutionHandler.INSTANCE.tick();
-          }
-        });
-
-    ServerWorldEvents.LOAD.register(
-        (server, world) -> {
-          if (ConfigHandler.instance.getConfig().enableDynamicResolution) {
-            DynamicResolutionHandler.INSTANCE.reset();
           }
         });
 
@@ -127,7 +109,7 @@ public class ResolutionControlMod implements ModInitializer {
       setClientFramebuffer(framebuffer);
 
       framebuffer.beginWrite(true);
-    // nothing on the client's framebuffer yet
+      // nothing on the client's framebuffer yet
     } else {
       setClientFramebuffer(clientFramebuffer);
       client.getFramebuffer().beginWrite(true);
@@ -214,15 +196,7 @@ public class ResolutionControlMod implements ModInitializer {
   }
 
   public double getCurrentScaleFactor() {
-    return shouldScale
-        ? Config.getInstance().enableDynamicResolution
-            ? DynamicResolutionHandler.INSTANCE.getCurrentScale()
-            : Config.getInstance().scaleFactor
-        : 1;
-  }
-
-  public void setEnableDynamicResolution(boolean enableDynamicResolution) {
-    Config.getInstance().enableDynamicResolution = enableDynamicResolution;
+    return shouldScale ? Config.getInstance().scaleFactor : 1;
   }
 
   public void onResolutionChanged() {
