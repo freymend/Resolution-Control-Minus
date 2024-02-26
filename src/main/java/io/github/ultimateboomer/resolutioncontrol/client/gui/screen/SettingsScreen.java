@@ -7,15 +7,17 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.font.MultilineText;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.Nullable;
 
+@Environment(EnvType.CLIENT)
 @SuppressWarnings("StaticInitializerReferencesSubClass")
 public class SettingsScreen extends Screen {
   protected static final Identifier WINDOW_TEXTURE =
@@ -57,6 +59,7 @@ public class SettingsScreen extends Screen {
 
   @Override
   protected void init() {
+    if (client == null) throw new IllegalStateException("Client is missing, are we a server?");
     super.init();
 
     centerX = width / 2;
@@ -68,17 +71,17 @@ public class SettingsScreen extends Screen {
     menuButtons = new LinkedHashMap<>();
     final int menuButtonWidth = 80;
     final int menuButtonHeight = 20;
-    MutableInt o = new MutableInt();
+    final int[] offset = {0}; // lambda needs effectively final variable
 
     screensSupplierList.forEach(
         (c, constructor) -> {
           SettingsScreen r = constructor.apply(this.parent);
-          ButtonWidget b =
+          var b =
               new ButtonWidget.Builder(
                       r.getTitle(), button -> client.setScreen(constructor.apply(this.parent)))
                   .dimensions(
                       startX - menuButtonWidth - 20,
-                      startY + o.getValue(),
+                      startY + offset[0],
                       menuButtonWidth,
                       menuButtonHeight)
                   .build();
@@ -86,7 +89,7 @@ public class SettingsScreen extends Screen {
           if (this.getClass().equals(c)) b.active = false;
 
           menuButtons.put(c, b);
-          o.add(25);
+          offset[0] += 25;
         });
 
     menuButtons.values().forEach(this::addDrawableChild);
@@ -156,7 +159,6 @@ public class SettingsScreen extends Screen {
     mod.setLastSettingsScreen(this.getClass());
   }
 
-  @SuppressWarnings("IntegerDivisionInFloatingPointContext")
   protected void drawCenteredString(DrawContext context, String text, int x, int y, int color) {
     context.drawText(textRenderer, text, x - textRenderer.getWidth(text) / 2, y, color, false);
   }

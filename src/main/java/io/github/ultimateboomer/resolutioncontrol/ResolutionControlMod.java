@@ -4,21 +4,17 @@ import io.github.ultimateboomer.resolutioncontrol.client.gui.screen.MainSettings
 import io.github.ultimateboomer.resolutioncontrol.client.gui.screen.SettingsScreen;
 import io.github.ultimateboomer.resolutioncontrol.util.*;
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.Framebuffer;
 import net.minecraft.client.gl.WindowFramebuffer;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
-import net.minecraft.client.util.ScreenshotRecorder;
 import net.minecraft.client.util.Window;
-import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -226,7 +222,7 @@ public class ResolutionControlMod implements ModInitializer {
     currentHeight = framebuffer.textureHeight;
 
     // Framebuffer uses color (4 x 8 = 32 bit int) and depth (32 bit float)
-    estimatedMemory = (long) currentWidth * currentHeight * 8;
+    estimatedMemory = ((long) currentWidth * currentHeight * 24) / 8;
   }
 
   public void resize(@Nullable Framebuffer framebuffer) {
@@ -261,8 +257,19 @@ public class ResolutionControlMod implements ModInitializer {
     return currentHeight;
   }
 
-  public long getEstimatedMemory() {
-    return estimatedMemory;
+  public String getEstimatedMemory() {
+    if (estimatedMemory < 1000) {
+      return estimatedMemory + " B";
+    }
+
+    String[] units = {"KB", "MB", "GB", "TB", "PB", "EB"};
+
+    int log10 = (int) Math.log10(estimatedMemory);
+    int decimalPlace = (int) Math.pow(10, 2 - log10 % 3);
+    int displayDigits = (int) (estimatedMemory / Math.pow(10, log10 - 2));
+
+    float result = (float) displayDigits / decimalPlace;
+    return String.format("%s %s", result, units[log10 / 3 - 1]);
   }
 
   public boolean isOptifineInstalled() {

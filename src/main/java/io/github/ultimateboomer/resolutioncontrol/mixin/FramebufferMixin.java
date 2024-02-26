@@ -1,7 +1,6 @@
 package io.github.ultimateboomer.resolutioncontrol.mixin;
 
 import com.mojang.blaze3d.platform.GlStateManager;
-import io.github.ultimateboomer.resolutioncontrol.ResolutionControlMod;
 import io.github.ultimateboomer.resolutioncontrol.util.Config;
 import java.nio.IntBuffer;
 import net.minecraft.client.MinecraftClient;
