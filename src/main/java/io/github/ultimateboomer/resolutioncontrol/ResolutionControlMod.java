@@ -8,7 +8,6 @@ import java.util.Set;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.Framebuffer;
 import net.minecraft.client.gl.WindowFramebuffer;
@@ -39,8 +38,6 @@ public class ResolutionControlMod implements ModInitializer {
     return instance;
   }
 
-  private boolean optifineInstalled;
-
   private KeyBinding settingsKey;
 
   private boolean shouldScale = false;
@@ -57,9 +54,6 @@ public class ResolutionControlMod implements ModInitializer {
   private int currentHeight;
 
   private long estimatedMemory;
-
-  private int lastWidth;
-  private int lastHeight;
 
   @Override
   public void onInitialize() {
@@ -81,8 +75,6 @@ public class ResolutionControlMod implements ModInitializer {
             client.setScreen(SettingsScreen.getScreen(lastSettingsScreen));
           }
         });
-
-    optifineInstalled = FabricLoader.getInstance().isModLoaded("optifabric");
   }
 
   public void setShouldScale(boolean shouldScale) {
@@ -196,10 +188,7 @@ public class ResolutionControlMod implements ModInitializer {
     //		{
     updateFramebufferSize();
 
-    lastWidth = getWindow().getScaledHeight();
-    lastHeight = getWindow().getScaledHeight();
     //		}
-
   }
 
   public void updateFramebufferSize() {
@@ -270,10 +259,6 @@ public class ResolutionControlMod implements ModInitializer {
 
     float result = (float) displayDigits / decimalPlace;
     return String.format("%s %s", result, units[log10 / 3 - 1]);
-  }
-
-  public boolean isOptifineInstalled() {
-    return optifineInstalled;
   }
 
   public void setLastSettingsScreen(Class<? extends SettingsScreen> ordinal) {
