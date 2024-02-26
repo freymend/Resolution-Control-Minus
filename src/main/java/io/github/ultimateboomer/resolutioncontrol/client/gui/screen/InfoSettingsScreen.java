@@ -1,17 +1,21 @@
 package io.github.ultimateboomer.resolutioncontrol.client.gui.screen;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.minecraft.client.font.MultilineText;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
-import org.apache.commons.lang3.StringUtils;
+import net.minecraft.text.Text;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.opengl.GL11;
 
+@Environment(EnvType.CLIENT)
 public class InfoSettingsScreen extends SettingsScreen {
   private String gpuName;
   private int maxTextureSize;
 
-  public InfoSettingsScreen(@Nullable Screen parent) {
+  protected InfoSettingsScreen(@Nullable Screen parent) {
     super(text("settings.info"), parent);
   }
 
@@ -19,18 +23,7 @@ public class InfoSettingsScreen extends SettingsScreen {
   protected void init() {
     super.init();
 
-    String[] gpuInfoSplit = StringUtils.split(GL11.glGetString(GL11.GL_RENDERER));
-    this.gpuName = "";
-    // Clean GPU string
-    for (int i = 1, gpuInfoSplitLength = gpuInfoSplit.length; i < gpuInfoSplitLength; i++) {
-      String s = gpuInfoSplit[i];
-      if (s.contains("/")) {
-        break;
-      } else {
-        this.gpuName += s + " ";
-      }
-    }
-
+    this.gpuName = GL11.glGetString(GL11.GL_RENDERER);
     this.maxTextureSize = RenderSystem.maxSupportedTextureSize();
   }
 
@@ -39,17 +32,19 @@ public class InfoSettingsScreen extends SettingsScreen {
     super.render(context, mouseX, mouseY, delta);
 
     drawLeftAlignedString(
+        context, text("settings.info.gpu").getString(), centerX - 85, centerY - 25, 0x808080);
+    drawMultilineString(
         context,
-        " \u00A78" + text("settings.info.gpu").getString() + " \u00A7r" + gpuName,
-        centerX - 75,
-        centerY - 35,
-        0x000000);
+        MultilineText.create(textRenderer, Text.literal(gpuName), 150),
+        centerX - 60,
+        centerY - 25,
+        0x808080);
 
     drawLeftAlignedString(
         context,
-        " \u00A78" + text("settings.info.maxTextureSize").getString() + " \u00A7r" + maxTextureSize,
-        centerX - 75,
-        centerY - 20,
-        0x000000);
+        text("settings.info.maxTextureSize").getString() + " " + maxTextureSize,
+        centerX - 85,
+        centerY - 40,
+        0x808080);
   }
 }

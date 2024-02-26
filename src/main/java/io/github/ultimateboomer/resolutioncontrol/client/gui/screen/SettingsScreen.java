@@ -6,6 +6,8 @@ import io.github.ultimateboomer.resolutioncontrol.util.Config;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Function;
+
+import net.minecraft.client.font.MultilineText;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
@@ -161,6 +163,10 @@ public class SettingsScreen extends Screen {
 
   protected void drawLeftAlignedString(DrawContext context, String text, int x, int y, int color) {
     context.drawText(textRenderer, text, x, y, color, false);
+  }
+
+  protected  void drawMultilineString(DrawContext context, MultilineText text, int x, int y, int color) {
+    text.draw(context, x, y, 16, color);
   }
 
   protected void drawRightAlignedString(DrawContext context, String text, int x, int y, int color) {
