@@ -3,7 +3,6 @@ package io.github.ultimateboomer.resolutioncontrol;
 import io.github.ultimateboomer.resolutioncontrol.client.gui.screen.MainSettingsScreen;
 import io.github.ultimateboomer.resolutioncontrol.client.gui.screen.SettingsScreen;
 import io.github.ultimateboomer.resolutioncontrol.util.*;
-import java.util.HashSet;
 import java.util.Set;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -45,8 +44,6 @@ public class ResolutionControlMod implements ModInitializer {
   @Nullable private Framebuffer framebuffer;
 
   @Nullable private Framebuffer clientFramebuffer;
-
-  private Set<Framebuffer> minecraftFramebuffers;
 
   private Class<? extends SettingsScreen> lastSettingsScreen = MainSettingsScreen.class;
 
@@ -195,15 +192,20 @@ public class ResolutionControlMod implements ModInitializer {
     if (framebuffer == null) return;
 
     resize(framebuffer);
-    resize(client.worldRenderer.getEntityOutlinesFramebuffer());
-    //		resizeMinecraftFramebuffers();
+    resizeEntityOutlinesFramebuffer();
 
     calculateSize();
   }
 
-  public void resizeMinecraftFramebuffers() {
-    initMinecraftFramebuffers();
-    minecraftFramebuffers.forEach(this::resize);
+  /**
+   * For reasons that I cannot begin to understand or explain, resizing what is labeled as the
+   * EntityOutlinesFramebuffer fixes entities not correctly rendering when the framebuffer is
+   * resized. So things like the player's hand, nether portals, clouds and mobs will not render at
+   * the proper coordinates if the framebuffer is resized and this is not called. The actual in game
+   * blocks that are rendered are not affected by this.
+   */
+  public void resizeEntityOutlinesFramebuffer() {
+    resize((client.worldRenderer.getEntityOutlinesFramebuffer()));
   }
 
   public void calculateSize() {
