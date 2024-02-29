@@ -219,13 +219,13 @@ public class ResolutionControlMod implements ModInitializer {
   public void resize(@Nullable Framebuffer framebuffer) {
     if (framebuffer == null) return;
 
-    boolean prev = shouldScale;
-    shouldScale = true;
+    boolean prev = this.shouldScale;
+    this.shouldScale = true;
     framebuffer.resize(
         getWindow().getFramebufferWidth(),
         getWindow().getFramebufferHeight(),
         MinecraftClient.IS_SYSTEM_MAC);
-    shouldScale = prev;
+    this.shouldScale = prev;
   }
 
   private Window getWindow() {
