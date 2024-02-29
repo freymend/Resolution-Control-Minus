@@ -40,7 +40,7 @@ public class ResolutionControlMod implements ModInitializer {
 
   private boolean shouldScale = false;
 
-  @Nullable private Framebuffer framebuffer;
+  private Framebuffer framebuffer;
 
   @Nullable private Framebuffer clientFramebuffer;
 
@@ -76,16 +76,6 @@ public class ResolutionControlMod implements ModInitializer {
   public void setShouldScale(boolean shouldScale) {
     if (shouldScale == this.shouldScale) return;
 
-    //		if (getScaleFactor() == 1) return;
-
-    Window window = getWindow();
-    if (framebuffer == null) {
-      this.shouldScale = true; // so we get the right dimensions
-      framebuffer =
-          new WindowFramebuffer(window.getFramebufferWidth(), window.getFramebufferHeight());
-      calculateSize();
-    }
-
     this.shouldScale = shouldScale;
 
     // swap out framebuffers as needed
@@ -99,6 +89,7 @@ public class ResolutionControlMod implements ModInitializer {
     } else {
       setClientFramebuffer(clientFramebuffer);
       client.getFramebuffer().beginWrite(true);
+      var window = getWindow();
       framebuffer.draw(window.getFramebufferWidth(), window.getFramebufferHeight());
     }
   }
@@ -205,6 +196,23 @@ public class ResolutionControlMod implements ModInitializer {
    */
   public void resizeEntityOutlinesFramebuffer() {
     resize((client.worldRenderer.getEntityOutlinesFramebuffer()));
+  }
+
+  /**
+   * So that the framebuffer is not initialized multiple times, this method should only be called
+   * once. The framebuffer technically can be null but because this method is called from the
+   * MinecraftClient instance, it should never be null.
+   */
+  public void initFramebuffer() {
+    if (framebuffer == null) {
+      framebuffer =
+          new WindowFramebuffer(
+              getWindow().getFramebufferWidth(), getWindow().getFramebufferWidth());
+      resize(framebuffer);
+      calculateSize();
+    } else {
+      throw new IllegalStateException("Framebuffer already initialized");
+    }
   }
 
   public void calculateSize() {
