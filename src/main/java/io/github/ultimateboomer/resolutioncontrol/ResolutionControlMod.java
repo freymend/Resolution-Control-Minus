@@ -94,26 +94,6 @@ public class ResolutionControlMod implements ModInitializer {
     }
   }
 
-  public void initMinecraftFramebuffers() {
-    if (minecraftFramebuffers != null) {
-      minecraftFramebuffers.clear();
-    } else {
-      minecraftFramebuffers = new HashSet<>();
-    }
-
-    minecraftFramebuffers.add(client.worldRenderer.getEntityOutlinesFramebuffer());
-    minecraftFramebuffers.add(client.worldRenderer.getTranslucentFramebuffer());
-    minecraftFramebuffers.add(client.worldRenderer.getEntityFramebuffer());
-    minecraftFramebuffers.add(client.worldRenderer.getParticlesFramebuffer());
-    minecraftFramebuffers.add(client.worldRenderer.getWeatherFramebuffer());
-    minecraftFramebuffers.add(client.worldRenderer.getCloudsFramebuffer());
-    minecraftFramebuffers.remove(null);
-  }
-
-  public Framebuffer getFramebuffer() {
-    return framebuffer;
-  }
-
   public void setScaleFactor(float scaleFactor) {
     Config.setScaleFactor(scaleFactor);
 
