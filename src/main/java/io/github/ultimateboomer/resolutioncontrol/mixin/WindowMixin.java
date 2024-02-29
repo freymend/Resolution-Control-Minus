@@ -52,6 +52,6 @@ public abstract class WindowMixin {
    */
   @Inject(at = @At("RETURN"), method = "onFramebufferSizeChanged")
   private void onFramebufferSizeChanged(CallbackInfo ci) {
-    ResolutionControlMod.getInstance().onResolutionChanged();
+    ResolutionControlMod.getInstance().updateFramebufferSize();
   }
 }

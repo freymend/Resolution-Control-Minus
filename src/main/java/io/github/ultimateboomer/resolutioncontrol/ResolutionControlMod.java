@@ -125,7 +125,7 @@ public class ResolutionControlMod implements ModInitializer {
 
     Config.setUpscaleAlgorithm(algorithm);
 
-    onResolutionChanged();
+    updateFramebufferSize();
   }
 
   public void nextUpscaleAlgorithm() {
@@ -142,7 +142,7 @@ public class ResolutionControlMod implements ModInitializer {
 
     Config.setDownscaleAlgorithm(algorithm);
 
-    onResolutionChanged();
+    updateFramebufferSize();
   }
 
   public void nextDownscaleAlgorithm() {
@@ -158,32 +158,23 @@ public class ResolutionControlMod implements ModInitializer {
     return shouldScale ? Config.getScaleFactor() : 1;
   }
 
-  public void onResolutionChanged() {
+  public void updateFramebufferSize() {
     if (getWindow() == null) return;
 
-    LOGGER.info(
-        "Size changed to {}x{} {}x{} {}x{}",
-        getWindow().getFramebufferWidth(),
-        getWindow().getFramebufferHeight(),
-        getWindow().getWidth(),
-        getWindow().getHeight(),
-        getWindow().getScaledWidth(),
-        getWindow().getScaledHeight());
-
-    //		if (getWindow().getScaledHeight() == lastWidth
-    //				|| getWindow().getScaledHeight() == lastHeight)
-    //		{
-    updateFramebufferSize();
-
-    //		}
-  }
-
-  public void updateFramebufferSize() {
-    if (framebuffer == null) return;
 
     resize(framebuffer);
     resizeEntityOutlinesFramebuffer();
 
+    var caller = Thread.currentThread();
+    LOGGER.info(
+        "Size changed to {}x{} {}x{} {}x{} by {}",
+        framebuffer.textureWidth,
+        framebuffer.textureHeight,
+        getWindow().getWidth(),
+        getWindow().getHeight(),
+        getWindow().getScaledWidth(),
+        getWindow().getScaledHeight(),
+        caller.getName());
     calculateSize();
   }
 
