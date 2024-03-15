@@ -20,14 +20,4 @@ public abstract class GameRendererMixin {
   private void onRenderWorldEnd(CallbackInfo callbackInfo) {
     ResolutionControlMod.getInstance().setShouldScale(false);
   }
-
-  /**
-   * This mixin is used to initialize the framebuffer after the game has started and when there is a
-   * valid window object. I'm too lazy to find a better way to do this. So we're just going to use
-   * this function because it's called after the window is created.
-   */
-  @Inject(at = @At("RETURN"), method = "createProgramReloader")
-  private void onCreateProgramReloader(CallbackInfoReturnable<ResourceReloader> cir) {
-    ResolutionControlMod.getInstance().initFramebuffer();
-  }
 }

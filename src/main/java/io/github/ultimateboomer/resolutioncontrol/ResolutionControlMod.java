@@ -4,6 +4,7 @@ import io.github.ultimateboomer.resolutioncontrol.client.gui.screen.MainSettings
 import io.github.ultimateboomer.resolutioncontrol.client.gui.screen.SettingsScreen;
 import io.github.ultimateboomer.resolutioncontrol.util.*;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.MinecraftClient;
@@ -71,6 +72,14 @@ public class ResolutionControlMod implements ModInitializer {
             client.setScreen(SettingsScreen.getScreen(lastSettingsScreen));
           }
         });
+
+    ClientLifecycleEvents.CLIENT_STARTED.register(client -> {
+      framebuffer =
+              new WindowFramebuffer(
+                      client.getWindow().getFramebufferWidth(), client.getWindow().getFramebufferWidth());
+      resize(framebuffer);
+      calculateSize();
+    });
   }
 
   public void setShouldScale(boolean shouldScale) {
@@ -167,23 +176,6 @@ public class ResolutionControlMod implements ModInitializer {
    */
   public void resizeEntityOutlinesFramebuffer() {
     resize((client.worldRenderer.getEntityOutlinesFramebuffer()));
-  }
-
-  /**
-   * So that the framebuffer is not initialized multiple times, this method should only be called
-   * once. The framebuffer technically can be null but because this method is called from the
-   * MinecraftClient instance, it should never be null.
-   */
-  public void initFramebuffer() {
-    if (framebuffer == null) {
-      framebuffer =
-          new WindowFramebuffer(
-              getWindow().getFramebufferWidth(), getWindow().getFramebufferWidth());
-      resize(framebuffer);
-      calculateSize();
-    } else {
-      throw new IllegalStateException("Framebuffer already initialized");
-    }
   }
 
   public void calculateSize() {
