@@ -184,7 +184,7 @@ public final class MainSettingsScreen extends SettingsScreen {
   @Override
   public void tick() {
     if (manualEntry) {
-      if (!super.getFocused().equals(entryTextField)) {
+      if (!entryTextField.equals(super.getFocused())) {
         super.magicalSpecialHackyFocus(entryTextField);
       }
 
