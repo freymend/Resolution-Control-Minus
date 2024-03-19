@@ -178,10 +178,4 @@ public class SettingsScreen extends Screen {
   public static SettingsScreen getScreen(Class<? extends SettingsScreen> screenClass) {
     return screensSupplierList.get(screenClass).apply(null);
   }
-
-  protected static Component getStateText(boolean enabled) {
-    return enabled
-        ? Component.translatable("addServer.resourcePack.enabled")
-        : Component.translatable("addServer.resourcePack.disabled");
-  }
 }

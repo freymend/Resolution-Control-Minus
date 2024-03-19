@@ -162,10 +162,6 @@ public class ResolutionControlMod implements ModInitializer {
     return client.getWindow();
   }
 
-  private void setClientFramebuffer(RenderTarget framebuffer) {
-    client.mainRenderTarget = framebuffer;
-  }
-
   public KeyMapping getSettingsKey() {
     return settingsKey;
   }
