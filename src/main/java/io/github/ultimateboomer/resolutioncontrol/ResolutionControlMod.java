@@ -145,7 +145,7 @@ public class ResolutionControlMod implements ModInitializer {
     currentWidth = framebuffer.width;
     currentHeight = framebuffer.height;
 
-    // Framebuffer uses color (4 x 8 = 32 bit int) and depth (32 bit float)
+    // Framebuffer uses 24 bits per pixel (8 bits per channel)
     estimatedMemory = ((long) currentWidth * currentHeight * 24) / 8;
   }
 
