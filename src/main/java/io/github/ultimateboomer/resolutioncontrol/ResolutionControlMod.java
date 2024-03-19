@@ -43,7 +43,7 @@ public class ResolutionControlMod implements ModInitializer {
 
   public RenderTarget framebuffer;
 
-  @Nullable private RenderTarget clientFramebuffer;
+  private RenderTarget clientFramebuffer;
 
   private Class<? extends SettingsScreen> lastSettingsScreen = MainSettingsScreen.class;
 
@@ -112,8 +112,6 @@ public class ResolutionControlMod implements ModInitializer {
   }
 
   public void updateFramebufferSize() {
-    if (getWindow() == null) return;
-
     resize(framebuffer);
     resizeEntityOutlinesFramebuffer();
 
