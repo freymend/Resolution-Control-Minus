@@ -132,7 +132,7 @@ public class SettingsScreen extends Screen {
     super.render(context, mouseX, mouseY, delta);
 
     drawLeftAlignedString(
-        context, "\u00a7r" + super.getTitle().getString(), centerX + 15, startY + 10, 0x000000);
+        context, "§r" + super.getTitle().getString(), centerX + 15, startY + 10, 0x000000);
 
     drawRightAlignedString(
         context, text("settings.title").getString(), centerX + 5, startY + 10, 0x404040);

@@ -32,19 +32,19 @@ public class InfoSettingsScreen extends SettingsScreen {
     super.render(context, mouseX, mouseY, delta);
 
     super.drawLeftAlignedString(
-        context, text("settings.info.gpu").getString(), centerX - 85, centerY - 25, 0x808080);
+        context, text("settings.info.gpu").getString(), centerX - 85, centerY - 25, 0xAAAAAA);
     super.drawMultilineString(
         context,
         MultiLineLabel.create(font, Component.literal(gpuName), 150),
         centerX - 60,
         centerY - 25,
-        0x808080);
+        0xAAAAAA);
 
     super.drawLeftAlignedString(
         context,
         text("settings.info.maxTextureSize").getString() + " " + maxTextureSize,
         centerX - 85,
         centerY - 40,
-        0x808080);
+        0xAAAAAA);
   }
 }

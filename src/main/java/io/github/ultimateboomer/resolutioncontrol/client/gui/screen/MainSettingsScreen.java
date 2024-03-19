@@ -135,7 +135,7 @@ public final class MainSettingsScreen extends SettingsScreen {
     super.render(context, mouseX, mouseY, time);
 
     if (!this.manualEntry) {
-      drawCenteredString(
+      super.drawCenteredString(
           context,
           String.format(
               "\u00a7%s%s\u00a7rx",
@@ -144,7 +144,7 @@ public final class MainSettingsScreen extends SettingsScreen {
           centerY - 36,
           0x000000);
 
-      drawCenteredString(
+      super.drawCenteredString(
           context,
           String.format(
               "\u00a78%sx%s\u00a7r",
@@ -154,7 +154,7 @@ public final class MainSettingsScreen extends SettingsScreen {
           centerY - 24,
           0x000000);
 
-      drawCenteredString(
+     super.drawCenteredString(
           context,
           "\u00a78"
               + text(
@@ -167,18 +167,18 @@ public final class MainSettingsScreen extends SettingsScreen {
           0x000000);
     }
 
-    drawLeftAlignedString(
+    super.drawLeftAlignedString(
         context,
-        "\u00a78" + text("settings.main.upscale").getString(),
+        text("settings.main.upscale").getString(),
         centerX + 15,
         centerY - 40,
-        0x000000);
-    drawLeftAlignedString(
+        0x555555);
+    super.drawLeftAlignedString(
         context,
-        "\u00a78" + text("settings.main.downscale").getString(),
+        text("settings.main.downscale").getString(),
         centerX + 15,
         centerY - 5,
-        0x000000);
+        0x555555);
   }
 
   @Override
