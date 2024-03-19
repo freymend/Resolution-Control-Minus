@@ -108,6 +108,8 @@ public class SettingsScreen extends Screen {
 
   @Override
   public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
+    if (super.minecraft == null) throw new IllegalStateException("Client is missing, are we a server?");
+
     if (super.minecraft.level == null) {
       super.renderDirtBackground(context);
     }
@@ -138,6 +140,8 @@ public class SettingsScreen extends Screen {
 
   @Override
   public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+    if (super.minecraft == null) throw new IllegalStateException("Client is missing, are we a server?");
+
     if ((ResolutionControlMod.getInstance().getSettingsKey().matches(keyCode, scanCode))) {
       applySettingsAndCleanup();
       super.minecraft.setScreen(this.parent);
