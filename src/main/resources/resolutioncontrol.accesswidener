@@ -1,16 +1,15 @@
 accessWidener v1 named
 
-accessible field net/minecraft/client/MinecraftClient framebuffer Lnet/minecraft/client/gl/Framebuffer;
-accessible field net/minecraft/client/MinecraftClient currentFps I
+accessible field net/minecraft/client/Minecraft mainRenderTarget Lcom/mojang/blaze3d/pipeline/RenderTarget;
 
-mutable field net/minecraft/client/MinecraftClient framebuffer Lnet/minecraft/client/gl/Framebuffer;
+mutable field net/minecraft/client/Minecraft mainRenderTarget Lcom/mojang/blaze3d/pipeline/RenderTarget;
 
-accessible field net/minecraft/client/render/WorldRenderer entityOutlinesFramebuffer Lnet/minecraft/client/gl/Framebuffer;
-accessible field net/minecraft/client/render/WorldRenderer translucentFramebuffer Lnet/minecraft/client/gl/Framebuffer;
-accessible field net/minecraft/client/render/WorldRenderer entityFramebuffer Lnet/minecraft/client/gl/Framebuffer;
-accessible field net/minecraft/client/render/WorldRenderer particlesFramebuffer Lnet/minecraft/client/gl/Framebuffer;
-accessible field net/minecraft/client/render/WorldRenderer weatherFramebuffer Lnet/minecraft/client/gl/Framebuffer;
-accessible field net/minecraft/client/render/WorldRenderer cloudsFramebuffer Lnet/minecraft/client/gl/Framebuffer;
+accessible field net/minecraft/client/renderer/LevelRenderer entityTarget Lcom/mojang/blaze3d/pipeline/RenderTarget;
+accessible field net/minecraft/client/renderer/LevelRenderer translucentTarget Lcom/mojang/blaze3d/pipeline/RenderTarget;
+accessible field net/minecraft/client/renderer/LevelRenderer itemEntityTarget Lcom/mojang/blaze3d/pipeline/RenderTarget;
+accessible field net/minecraft/client/renderer/LevelRenderer particlesTarget Lcom/mojang/blaze3d/pipeline/RenderTarget;
+accessible field net/minecraft/client/renderer/LevelRenderer weatherTarget Lcom/mojang/blaze3d/pipeline/RenderTarget;
+accessible field net/minecraft/client/renderer/LevelRenderer cloudsTarget Lcom/mojang/blaze3d/pipeline/RenderTarget;
 
-accessible field net/minecraft/client/util/Window framebufferWidth I
-accessible field net/minecraft/client/util/Window framebufferHeight I
+accessible field com/mojang/blaze3d/platform/Window framebufferWidth I
+accessible field com/mojang/blaze3d/platform/Window framebufferHeight I

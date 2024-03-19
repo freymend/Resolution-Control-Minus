@@ -3,10 +3,10 @@ package io.github.ultimateboomer.resolutioncontrol.client.gui.screen;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.font.MultilineText;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.text.Text;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.MultiLineLabel;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.opengl.GL11;
 
@@ -16,7 +16,7 @@ public class InfoSettingsScreen extends SettingsScreen {
   private int maxTextureSize;
 
   protected InfoSettingsScreen(@Nullable Screen parent) {
-    super(text("settings.info"), parent);
+    super(SettingsScreen.text("settings.info"), parent);
   }
 
   @Override
@@ -28,19 +28,19 @@ public class InfoSettingsScreen extends SettingsScreen {
   }
 
   @Override
-  public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+  public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
     super.render(context, mouseX, mouseY, delta);
 
-    drawLeftAlignedString(
+    super.drawLeftAlignedString(
         context, text("settings.info.gpu").getString(), centerX - 85, centerY - 25, 0x808080);
-    drawMultilineString(
+    super.drawMultilineString(
         context,
-        MultilineText.create(textRenderer, Text.literal(gpuName), 150),
+        MultiLineLabel.create(font, Component.literal(gpuName), 150),
         centerX - 60,
         centerY - 25,
         0x808080);
 
-    drawLeftAlignedString(
+    super.drawLeftAlignedString(
         context,
         text("settings.info.maxTextureSize").getString() + " " + maxTextureSize,
         centerX - 85,

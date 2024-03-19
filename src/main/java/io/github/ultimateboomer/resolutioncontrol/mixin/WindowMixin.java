@@ -1,8 +1,8 @@
 package io.github.ultimateboomer.resolutioncontrol.mixin;
 
+import com.mojang.blaze3d.platform.Window;
 import io.github.ultimateboomer.resolutioncontrol.ResolutionControlMod;
-import net.minecraft.client.util.Window;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.Mth;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -18,7 +18,7 @@ public abstract class WindowMixin {
    * the Client Window FrameBuffer, not the other FrameBuffers used in rendering the game. The
    * rendering of the GUI isn't affected.
    */
-  @Inject(at = @At("RETURN"), method = "getFramebufferWidth", cancellable = true)
+  @Inject(at = @At("RETURN"), method = "getWidth", cancellable = true)
   private void getFramebufferWidth(CallbackInfoReturnable<Integer> ci) {
     ci.setReturnValue(scale(ci.getReturnValueI()));
   }
@@ -29,7 +29,7 @@ public abstract class WindowMixin {
    * the Client Window FrameBuffer, not the other FrameBuffers used in rendering the game. The
    * rendering of the GUI isn't affected.
    */
-  @Inject(at = @At("RETURN"), method = "getFramebufferHeight", cancellable = true)
+  @Inject(at = @At("RETURN"), method = "getHeight", cancellable = true)
   private void getFramebufferHeight(CallbackInfoReturnable<Integer> ci) {
     ci.setReturnValue(scale(ci.getReturnValueI()));
   }
@@ -42,7 +42,7 @@ public abstract class WindowMixin {
   @Unique
   private int scale(int value) {
     double scaleFactor = ResolutionControlMod.getInstance().getCurrentScaleFactor();
-    int roundedScaleValue = MathHelper.ceil((double) value * scaleFactor);
+    int roundedScaleValue = Mth.ceil((double) value * scaleFactor);
     return Math.max(roundedScaleValue, 1);
   }
 
@@ -50,7 +50,7 @@ public abstract class WindowMixin {
    * This method is called when the client window is resized. The game is rendered at the resolution
    * of the scaled window, so we need to update the FrameBuffers to match the new window size.
    */
-  @Inject(at = @At("RETURN"), method = "onFramebufferSizeChanged")
+  @Inject(at = @At("RETURN"), method = "onFramebufferResize")
   private void onFramebufferSizeChanged(CallbackInfo ci) {
     ResolutionControlMod.getInstance().updateFramebufferSize();
   }

@@ -1,11 +1,11 @@
 package io.github.ultimateboomer.resolutioncontrol.mixin;
 
+import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.GlStateManager;
 import io.github.ultimateboomer.resolutioncontrol.util.Config;
 import java.nio.IntBuffer;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gl.Framebuffer;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.Minecraft;
+import net.minecraft.util.Mth;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 import org.lwjgl.opengl.GL45;
@@ -17,17 +17,17 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(Framebuffer.class)
+@Mixin(RenderTarget.class)
 public abstract class FramebufferMixin {
   @Unique private boolean isMipmapped;
   @Unique private float scaleMultiplier;
 
   @Shadow
-  public abstract int getColorAttachment();
+  public abstract int getColorTextureId();
 
-  @Inject(method = "initFbo", at = @At("HEAD"))
+  @Inject(method = "createBuffers", at = @At("HEAD"))
   private void onInitFbo(int width, int height, boolean getError, CallbackInfo ci) {
-    scaleMultiplier = (float) width / MinecraftClient.getInstance().getWindow().getWidth();
+    scaleMultiplier = (float) width / Minecraft.getInstance().getWindow().getWidth();
     isMipmapped = Config.getMipmapHighRes() && scaleMultiplier > 2.0f;
   }
 
@@ -55,7 +55,7 @@ public abstract class FramebufferMixin {
   }
 
   @Redirect(
-      method = "initFbo",
+      method = "createBuffers",
       at =
           @At(
               value = "INVOKE",
@@ -72,7 +72,7 @@ public abstract class FramebufferMixin {
       int type,
       IntBuffer pixels) {
     if (isMipmapped) {
-      int mipmapLevel = MathHelper.ceil(Math.log(scaleMultiplier) / Math.log(2));
+      int mipmapLevel = Mth.ceil(Math.log(scaleMultiplier) / Math.log(2));
       for (int i = 0; i < mipmapLevel; i++) {
         GlStateManager._texImage2D(
             target, i, internalFormat, width << i, height << i, border, format, type, pixels);
@@ -83,10 +83,10 @@ public abstract class FramebufferMixin {
     }
   }
 
-  @Inject(method = "drawInternal", at = @At("HEAD"))
+  @Inject(method = "_blitToScreen", at = @At("HEAD"))
   private void onDraw(int width, int height, boolean bl, CallbackInfo ci) {
     if (isMipmapped) {
-      GlStateManager._bindTexture(this.getColorAttachment());
+      GlStateManager._bindTexture(this.getColorTextureId());
       GL45.glGenerateMipmap(GL11.GL_TEXTURE_2D);
     }
   }

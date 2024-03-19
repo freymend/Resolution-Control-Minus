@@ -9,22 +9,22 @@ import java.util.function.Function;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.font.MultilineText;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.MultiLineLabel;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
 @Environment(EnvType.CLIENT)
 @SuppressWarnings("StaticInitializerReferencesSubClass")
 public class SettingsScreen extends Screen {
-  protected static final Identifier WINDOW_TEXTURE =
+  protected static final ResourceLocation WINDOW_TEXTURE =
       ResolutionControlMod.identifier("textures/gui/settings.png");
 
-  protected static Text text(String path, Object... args) {
-    return Text.translatable(ResolutionControlMod.MOD_ID + "." + path, args);
+  protected static Component text(String path, Object... args) {
+    return Component.translatable(ResolutionControlMod.MOD_ID + "." + path, args);
   }
 
   protected static final int containerWidth = 192;
@@ -48,18 +48,18 @@ public class SettingsScreen extends Screen {
   protected int startX;
   protected int startY;
 
-  protected Map<Class<? extends SettingsScreen>, ButtonWidget> menuButtons;
+  protected Map<Class<? extends SettingsScreen>, Button> menuButtons;
 
-  protected ButtonWidget doneButton;
+  protected Button doneButton;
 
-  protected SettingsScreen(Text title, @Nullable Screen parent) {
+  protected SettingsScreen(Component title, @Nullable Screen parent) {
     super(title);
     this.parent = parent;
   }
 
   @Override
   protected void init() {
-    if (client == null) throw new IllegalStateException("Client is missing, are we a server?");
+    if (super.minecraft == null) throw new IllegalStateException("Client is missing, are we a server?");
     super.init();
 
     centerX = width / 2;
@@ -77,9 +77,9 @@ public class SettingsScreen extends Screen {
         (c, constructor) -> {
           SettingsScreen r = constructor.apply(this.parent);
           var b =
-              new ButtonWidget.Builder(
-                      r.getTitle(), button -> client.setScreen(constructor.apply(this.parent)))
-                  .dimensions(
+              new Button.Builder(
+                      r.getTitle(), button -> super.minecraft.setScreen(constructor.apply(this.parent)))
+                  .bounds(
                       startX - menuButtonWidth - 20,
                       startY + offset[0],
                       menuButtonWidth,
@@ -92,24 +92,24 @@ public class SettingsScreen extends Screen {
           offset[0] += 25;
         });
 
-    menuButtons.values().forEach(this::addDrawableChild);
+    menuButtons.values().forEach(this::addRenderableWidget);
 
     doneButton =
-        new ButtonWidget.Builder(
-                Text.translatable("gui.done"),
+        new Button.Builder(
+                Component.translatable("gui.done"),
                 button -> {
                   applySettingsAndCleanup();
-                  client.setScreen(this.parent);
+                  minecraft.setScreen(this.parent);
                 })
-            .dimensions(centerX + 15, startY + containerHeight - 30, 60, 20)
+            .bounds(centerX + 15, startY + containerHeight - 30, 60, 20)
             .build();
-    this.addDrawableChild(doneButton);
+    super.addRenderableWidget(doneButton);
   }
 
   @Override
-  public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-    if (client.world == null) {
-      renderBackgroundTexture(context);
+  public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
+    if (super.minecraft.level == null) {
+      super.renderDirtBackground(context);
     }
 
     RenderSystem.disableDepthTest();
@@ -118,7 +118,7 @@ public class SettingsScreen extends Screen {
 
     int textureWidth = 256;
     int textureHeight = 192;
-    context.drawTexture(
+    context.blit(
         WINDOW_TEXTURE,
         centerX - textureWidth / 2,
         centerY - textureHeight / 2,
@@ -130,7 +130,7 @@ public class SettingsScreen extends Screen {
     super.render(context, mouseX, mouseY, delta);
 
     drawLeftAlignedString(
-        context, "\u00a7r" + getTitle().getString(), centerX + 15, startY + 10, 0x000000);
+        context, "\u00a7r" + super.getTitle().getString(), centerX + 15, startY + 10, 0x000000);
 
     drawRightAlignedString(
         context, text("settings.title").getString(), centerX + 5, startY + 10, 0x404040);
@@ -138,10 +138,10 @@ public class SettingsScreen extends Screen {
 
   @Override
   public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-    if ((ResolutionControlMod.getInstance().getSettingsKey().matchesKey(keyCode, scanCode))) {
-      this.applySettingsAndCleanup();
-      this.client.setScreen(this.parent);
-      this.client.mouse.lockCursor();
+    if ((ResolutionControlMod.getInstance().getSettingsKey().matches(keyCode, scanCode))) {
+      applySettingsAndCleanup();
+      super.minecraft.setScreen(this.parent);
+      super.minecraft.mouseHandler.grabMouse();
       return true;
     } else {
       return super.keyPressed(keyCode, scanCode, modifiers);
@@ -149,9 +149,9 @@ public class SettingsScreen extends Screen {
   }
 
   @Override
-  public void close() {
-    this.applySettingsAndCleanup();
-    super.close();
+  public void onClose() {
+    applySettingsAndCleanup();
+    super.onClose();
   }
 
   protected void applySettingsAndCleanup() {
@@ -159,29 +159,29 @@ public class SettingsScreen extends Screen {
     mod.setLastSettingsScreen(this.getClass());
   }
 
-  protected void drawCenteredString(DrawContext context, String text, int x, int y, int color) {
-    context.drawText(textRenderer, text, x - textRenderer.getWidth(text) / 2, y, color, false);
+  protected void drawCenteredString(GuiGraphics context, String text, int x, int y, int color) {
+    context.drawString(super.font, text, x - super.font.width(text) / 2, y, color, false);
   }
 
-  protected void drawLeftAlignedString(DrawContext context, String text, int x, int y, int color) {
-    context.drawText(textRenderer, text, x, y, color, false);
+  protected void drawLeftAlignedString(GuiGraphics context, String text, int x, int y, int color) {
+    context.drawString(super.font, text, x, y, color, false);
   }
 
-  protected  void drawMultilineString(DrawContext context, MultilineText text, int x, int y, int color) {
-    text.draw(context, x, y, 16, color);
+  protected  void drawMultilineString(GuiGraphics context, MultiLineLabel text, int x, int y, int color) {
+    text.renderLeftAlignedNoShadow(context, x, y, 16, color);
   }
 
-  protected void drawRightAlignedString(DrawContext context, String text, int x, int y, int color) {
-    context.drawText(textRenderer, text, x - textRenderer.getWidth(text), y, color, false);
+  protected void drawRightAlignedString(GuiGraphics context, String text, int x, int y, int color) {
+    context.drawString(super.font, text, x - super.font.width(text), y, color, false);
   }
 
   public static SettingsScreen getScreen(Class<? extends SettingsScreen> screenClass) {
     return screensSupplierList.get(screenClass).apply(null);
   }
 
-  protected static Text getStateText(boolean enabled) {
+  protected static Component getStateText(boolean enabled) {
     return enabled
-        ? Text.translatable("addServer.resourcePack.enabled")
-        : Text.translatable("addServer.resourcePack.disabled");
+        ? Component.translatable("addServer.resourcePack.enabled")
+        : Component.translatable("addServer.resourcePack.disabled");
   }
 }

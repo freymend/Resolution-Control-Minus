@@ -1,13 +1,13 @@
 package io.github.ultimateboomer.resolutioncontrol.mixin;
 
 import io.github.ultimateboomer.resolutioncontrol.ResolutionControlMod;
-import net.minecraft.client.render.WorldRenderer;
+import net.minecraft.client.renderer.LevelRenderer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(WorldRenderer.class)
+@Mixin(LevelRenderer.class)
 public class WorldRendererMixin {
 
   /**
@@ -17,7 +17,7 @@ public class WorldRendererMixin {
    * function happens to be called one time on client start up, and happens after the framebuffers
    * have been created, so we can resize the entityOutlinesFramebuffer here.
    */
-  @Inject(at = @At("RETURN"), method = "loadEntityOutlinePostProcessor")
+  @Inject(at = @At("RETURN"), method = "initOutline")
   private void onLoadEntityOutlineShader(CallbackInfo ci) {
     ResolutionControlMod.getInstance().resizeEntityOutlinesFramebuffer();
   }

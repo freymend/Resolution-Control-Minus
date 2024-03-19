@@ -3,7 +3,8 @@ package io.github.ultimateboomer.resolutioncontrol.util;
 import io.github.ultimateboomer.resolutioncontrol.ResolutionControlMod;
 import java.io.*;
 import java.util.Properties;
-import net.minecraft.client.MinecraftClient;
+
+import net.minecraft.client.Minecraft;
 
 public final class Config {
 
@@ -60,7 +61,7 @@ public final class Config {
 
   private static File configFile() {
     return new File(
-        MinecraftClient.getInstance().runDirectory,
+        Minecraft.getInstance().gameDirectory,
         "config/" + ResolutionControlMod.MOD_ID + ".properties");
   }
 

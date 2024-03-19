@@ -1,5 +1,9 @@
 package io.github.ultimateboomer.resolutioncontrol;
 
+import com.mojang.blaze3d.pipeline.MainTarget;
+import com.mojang.blaze3d.pipeline.RenderTarget;
+import com.mojang.blaze3d.platform.InputConstants;
+import com.mojang.blaze3d.platform.Window;
 import io.github.ultimateboomer.resolutioncontrol.client.gui.screen.MainSettingsScreen;
 import io.github.ultimateboomer.resolutioncontrol.client.gui.screen.SettingsScreen;
 import io.github.ultimateboomer.resolutioncontrol.util.*;
@@ -7,13 +11,9 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gl.Framebuffer;
-import net.minecraft.client.gl.WindowFramebuffer;
-import net.minecraft.client.option.KeyBinding;
-import net.minecraft.client.util.InputUtil;
-import net.minecraft.client.util.Window;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.KeyMapping;
+import net.minecraft.client.Minecraft;
+import net.minecraft.resources.ResourceLocation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
@@ -25,11 +25,11 @@ public class ResolutionControlMod implements ModInitializer {
 
   public static final Logger LOGGER = LogManager.getLogger(MOD_NAME);
 
-  public static Identifier identifier(String path) {
-    return new Identifier(MOD_ID, path);
+  public static ResourceLocation identifier(String path) {
+    return new ResourceLocation(MOD_ID, path);
   }
 
-  private static final MinecraftClient client = MinecraftClient.getInstance();
+  private static final Minecraft client = Minecraft.getInstance();
 
   private static ResolutionControlMod instance;
 
@@ -37,13 +37,13 @@ public class ResolutionControlMod implements ModInitializer {
     return instance;
   }
 
-  private KeyBinding settingsKey;
+  private KeyMapping settingsKey;
 
   private boolean shouldScale = false;
 
-  private Framebuffer framebuffer;
+  public RenderTarget framebuffer;
 
-  @Nullable private Framebuffer clientFramebuffer;
+  @Nullable private RenderTarget clientFramebuffer;
 
   private Class<? extends SettingsScreen> lastSettingsScreen = MainSettingsScreen.class;
 
@@ -60,26 +60,26 @@ public class ResolutionControlMod implements ModInitializer {
 
     settingsKey =
         KeyBindingHelper.registerKeyBinding(
-            new KeyBinding(
+            new KeyMapping(
                 "key.resolutioncontrol.settings",
-                InputUtil.Type.KEYSYM,
+                InputConstants.Type.KEYSYM,
                 GLFW.GLFW_KEY_O,
                 "key.categories.resolutioncontrol"));
 
     ClientTickEvents.END_CLIENT_TICK.register(
         client -> {
-          while (settingsKey.wasPressed()) {
+          while (settingsKey.consumeClick()) {
             client.setScreen(SettingsScreen.getScreen(lastSettingsScreen));
           }
         });
 
-    ClientLifecycleEvents.CLIENT_STARTED.register(client -> {
-      framebuffer =
-              new WindowFramebuffer(
-                      client.getWindow().getFramebufferWidth(), client.getWindow().getFramebufferWidth());
-      resize(framebuffer);
-      calculateSize();
-    });
+    ClientLifecycleEvents.CLIENT_STARTED.register(
+        client -> {
+          framebuffer =
+              new MainTarget(client.getWindow().getWidth(), client.getWindow().getHeight());
+          resize(framebuffer);
+          calculateSize();
+        });
   }
 
   public void setShouldScale(boolean shouldScale) {
@@ -89,17 +89,15 @@ public class ResolutionControlMod implements ModInitializer {
 
     // swap out framebuffers as needed
     if (shouldScale) {
-      clientFramebuffer = client.getFramebuffer();
-
-      setClientFramebuffer(framebuffer);
-
-      framebuffer.beginWrite(true);
+      clientFramebuffer = client.getMainRenderTarget();
+      client.mainRenderTarget = framebuffer;
+      framebuffer.bindWrite(true);
       // nothing on the client's framebuffer yet
     } else {
-      setClientFramebuffer(clientFramebuffer);
-      client.getFramebuffer().beginWrite(true);
+      client.mainRenderTarget = clientFramebuffer;
+      client.getMainRenderTarget().bindWrite(true);
       var window = getWindow();
-      framebuffer.draw(window.getFramebufferWidth(), window.getFramebufferHeight());
+      framebuffer.blitToScreen(window.getWidth(), window.getHeight());
     }
   }
 
@@ -109,40 +107,6 @@ public class ResolutionControlMod implements ModInitializer {
     updateFramebufferSize();
   }
 
-  public void setUpscaleAlgorithm(ScalingAlgorithm algorithm) {
-    if (algorithm == Config.getUpscaleAlgorithm()) return;
-
-    Config.setUpscaleAlgorithm(algorithm);
-
-    updateFramebufferSize();
-  }
-
-  public void nextUpscaleAlgorithm() {
-    ScalingAlgorithm currentAlgorithm = Config.getUpscaleAlgorithm();
-    if (currentAlgorithm.equals(ScalingAlgorithm.NEAREST)) {
-      setUpscaleAlgorithm(ScalingAlgorithm.LINEAR);
-    } else {
-      setUpscaleAlgorithm(ScalingAlgorithm.NEAREST);
-    }
-  }
-
-  public void setDownscaleAlgorithm(ScalingAlgorithm algorithm) {
-    if (algorithm == Config.getDownscaleAlgorithm()) return;
-
-    Config.setDownscaleAlgorithm(algorithm);
-
-    updateFramebufferSize();
-  }
-
-  public void nextDownscaleAlgorithm() {
-    ScalingAlgorithm currentAlgorithm = Config.getDownscaleAlgorithm();
-    if (currentAlgorithm.equals(ScalingAlgorithm.NEAREST)) {
-      setDownscaleAlgorithm(ScalingAlgorithm.LINEAR);
-    } else {
-      setDownscaleAlgorithm(ScalingAlgorithm.NEAREST);
-    }
-  }
-
   public double getCurrentScaleFactor() {
     return shouldScale ? Config.getScaleFactor() : 1;
   }
@@ -150,19 +114,18 @@ public class ResolutionControlMod implements ModInitializer {
   public void updateFramebufferSize() {
     if (getWindow() == null) return;
 
-
     resize(framebuffer);
     resizeEntityOutlinesFramebuffer();
 
     var caller = Thread.currentThread();
     LOGGER.info(
         "Size changed to {}x{} {}x{} {}x{} by {}",
-        framebuffer.textureWidth,
-        framebuffer.textureHeight,
+        framebuffer.width,
+        framebuffer.height,
         getWindow().getWidth(),
         getWindow().getHeight(),
-        getWindow().getScaledWidth(),
-        getWindow().getScaledHeight(),
+        getWindow().getGuiScaledWidth(),
+        getWindow().getGuiScaledHeight(),
         caller.getName());
     calculateSize();
   }
@@ -175,26 +138,23 @@ public class ResolutionControlMod implements ModInitializer {
    * blocks that are rendered are not affected by this.
    */
   public void resizeEntityOutlinesFramebuffer() {
-    resize((client.worldRenderer.getEntityOutlinesFramebuffer()));
+    resize((client.levelRenderer.entityTarget()));
   }
 
   public void calculateSize() {
-    currentWidth = framebuffer.textureWidth;
-    currentHeight = framebuffer.textureHeight;
+    currentWidth = framebuffer.width;
+    currentHeight = framebuffer.height;
 
     // Framebuffer uses color (4 x 8 = 32 bit int) and depth (32 bit float)
     estimatedMemory = ((long) currentWidth * currentHeight * 24) / 8;
   }
 
-  public void resize(@Nullable Framebuffer framebuffer) {
+  public void resize(@Nullable RenderTarget framebuffer) {
     if (framebuffer == null) return;
 
     boolean prev = this.shouldScale;
     this.shouldScale = true;
-    framebuffer.resize(
-        getWindow().getFramebufferWidth(),
-        getWindow().getFramebufferHeight(),
-        MinecraftClient.IS_SYSTEM_MAC);
+    framebuffer.resize(getWindow().getWidth(), getWindow().getHeight(), Minecraft.ON_OSX);
     this.shouldScale = prev;
   }
 
@@ -202,11 +162,11 @@ public class ResolutionControlMod implements ModInitializer {
     return client.getWindow();
   }
 
-  private void setClientFramebuffer(Framebuffer framebuffer) {
-    client.framebuffer = framebuffer;
+  private void setClientFramebuffer(RenderTarget framebuffer) {
+    client.mainRenderTarget = framebuffer;
   }
 
-  public KeyBinding getSettingsKey() {
+  public KeyMapping getSettingsKey() {
     return settingsKey;
   }
 

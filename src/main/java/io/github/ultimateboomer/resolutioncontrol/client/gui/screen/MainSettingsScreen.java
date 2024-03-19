@@ -1,41 +1,39 @@
 package io.github.ultimateboomer.resolutioncontrol.client.gui.screen;
 
 import io.github.ultimateboomer.resolutioncontrol.ResolutionControlMod;
+import io.github.ultimateboomer.resolutioncontrol.client.gui.screen.button.downScale;
+import io.github.ultimateboomer.resolutioncontrol.client.gui.screen.button.upScale;
 import io.github.ultimateboomer.resolutioncontrol.util.Config;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.text.Text;
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.math.NumberUtils;
+import java.util.List;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
 @SuppressWarnings("FieldCanBeLocal")
 public final class MainSettingsScreen extends SettingsScreen {
-  private static final float[] scaleValues = {
-    0.0f, 0.01f, 0.025f, 0.05f, 0.1f, 0.25f, 0.5f, 0.75f, 1.0f, 1.25f, 1.5f, 2.0f, 3.0f, 4.0f, 6.0f,
-    8.0f
-  };
+  private static final List<Float> scaleValues =
+      List.of(
+          0.0f, 0.01f, 0.025f, 0.05f, 0.1f, 0.25f, 0.5f, 0.75f, 1.0f, 1.25f, 1.5f, 2.0f, 3.0f, 4.0f,
+          6.0f, 8.0f);
 
   private static final double redValue = 2.0;
 
-  private static final Text increaseText = Text.literal("+");
-  private static final Text decreaseText = Text.literal("-");
-  private static final Text setText = Text.literal("S");
-  private static final Text resetText = Text.literal("R");
-  private static final Text cancelText = Text.literal("C");
+  private static final Component increaseText = Component.literal("+");
+  private static final Component decreaseText = Component.literal("-");
+  private static final Component setText = Component.literal("S");
+  private static final Component resetText = Component.literal("R");
+  private static final Component cancelText = Component.literal("C");
 
-  private ButtonWidget increaseButton;
-  private ButtonWidget decreaseButton;
-  private ButtonWidget setButton;
-  private ButtonWidget cancelOrResetButton;
+  private Button increaseButton;
+  private Button decreaseButton;
+  private Button setButton;
+  private Button cancelOrResetButton;
 
-  private TextFieldWidget entryTextField;
-
-  private ButtonWidget upscaleAlgoButton;
-  private ButtonWidget downscaleAlgoButton;
+  private EditBox entryTextField;
 
   private boolean manualEntry = false;
 
@@ -53,31 +51,31 @@ public final class MainSettingsScreen extends SettingsScreen {
     int textFieldSize = 40;
 
     decreaseButton =
-        new ButtonWidget.Builder(decreaseText, button -> changeScaleFactor(false))
-            .dimensions(
+        new Button.Builder(decreaseText, button -> changeScaleFactor(false))
+            .bounds(
                 centerX - 55 - buttonOffset - buttonSize / 2, buttonY, buttonSize, buttonSize)
             .build();
-    this.addDrawableChild(decreaseButton);
+    super.addRenderableWidget(decreaseButton);
 
     increaseButton =
-        new ButtonWidget.Builder(increaseText, button -> changeScaleFactor(true))
-            .dimensions(
+        new Button.Builder(increaseText, button -> changeScaleFactor(true))
+            .bounds(
                 centerX - 55 + buttonOffset - buttonSize / 2, buttonY, buttonSize, buttonSize)
             .build();
-    this.addDrawableChild(increaseButton);
+    super.addRenderableWidget(increaseButton);
 
     setButton =
-        new ButtonWidget.Builder(setText, button -> setManualEntry(!manualEntry, false))
-            .dimensions(
+        new Button.Builder(setText, button -> setManualEntry(!manualEntry, false))
+            .bounds(
                 centerX - 55 - buttonOffset - buttonSize / 2,
                 buttonY + buttonSize,
                 buttonSize,
                 buttonSize)
             .build();
-    this.addDrawableChild(setButton);
+    super.addRenderableWidget(setButton);
 
     cancelOrResetButton =
-        new ButtonWidget.Builder(
+        new Button.Builder(
                 resetText,
                 button -> {
                   if (manualEntry) {
@@ -87,46 +85,30 @@ public final class MainSettingsScreen extends SettingsScreen {
                     updateButtons();
                   }
                 })
-            .dimensions(
+            .bounds(
                 centerX - 55 - buttonOffset + buttonSize / 2,
                 buttonY + buttonSize,
                 buttonSize,
                 buttonSize)
             .build();
-    this.addDrawableChild(cancelOrResetButton);
+    super.addRenderableWidget(cancelOrResetButton);
 
     entryTextField =
-        new TextFieldWidget(
-            textRenderer,
+        new EditBox(
+            font,
             centerX - 55 - textFieldSize / 2,
             centerY - 36,
             textFieldSize,
             buttonSize,
-            Text.empty());
+            Component.empty());
     entryTextField.setVisible(false);
-    this.addDrawableChild(entryTextField);
+    super.addRenderableWidget(entryTextField);
 
-    upscaleAlgoButton =
-        new ButtonWidget.Builder(
-                Config.getUpscaleAlgorithm().getText(),
-                button -> {
-                  mod.nextUpscaleAlgorithm();
-                  button.setMessage(Config.getUpscaleAlgorithm().getText());
-                })
-            .dimensions(centerX + 15, centerY - 28, 60, buttonSize)
-            .build();
-    this.addDrawableChild(upscaleAlgoButton);
+    var upscaleAlgoButton = upScale.upscaleAlgoButton(centerX, centerY, buttonSize);
+    super.addRenderableWidget(upscaleAlgoButton);
 
-    downscaleAlgoButton =
-        new ButtonWidget.Builder(
-                Config.getDownscaleAlgorithm().getText(),
-                button -> {
-                  mod.nextDownscaleAlgorithm();
-                  button.setMessage(Config.getDownscaleAlgorithm().getText());
-                })
-            .dimensions(centerX + 15, centerY + 8, 60, buttonSize)
-            .build();
-    this.addDrawableChild(downscaleAlgoButton);
+    var downscaleAlgoButton = downScale.downScaleButton(centerX, centerY, buttonSize);
+    super.addRenderableWidget(downscaleAlgoButton);
 
     updateButtons();
   }
@@ -149,7 +131,7 @@ public final class MainSettingsScreen extends SettingsScreen {
   }
 
   @Override
-  public void render(DrawContext context, int mouseX, int mouseY, float time) {
+  public void render(GuiGraphics context, int mouseX, int mouseY, float time) {
     super.render(context, mouseX, mouseY, time);
 
     if (!this.manualEntry) {
@@ -202,8 +184,8 @@ public final class MainSettingsScreen extends SettingsScreen {
   @Override
   public void tick() {
     if (manualEntry) {
-      if (!this.getFocused().equals(entryTextField)) {
-        this.focusOn(entryTextField);
+      if (!super.getFocused().equals(entryTextField)) {
+        super.magicalSpecialHackyFocus(entryTextField);
       }
 
       if (!entryTextField.active) {
@@ -215,49 +197,41 @@ public final class MainSettingsScreen extends SettingsScreen {
 
   private void changeScaleFactor(boolean add) {
     float currentScale = Config.getScaleFactor();
-    int nextIndex = ArrayUtils.indexOf(scaleValues, currentScale);
-    if (nextIndex == -1) {
-      for (int i = -1; i < scaleValues.length; ++i) {
-        double scale1 = i == -1 ? 0.0 : scaleValues[i];
-        double scale2 = i == scaleValues.length - 1 ? Double.POSITIVE_INFINITY : scaleValues[i + 1];
-
-        if (currentScale > scale1 && currentScale < scale2) {
-          nextIndex = i + (add ? 1 : 0);
-          break;
-        }
-      }
-    } else {
+    int nextIndex = scaleValues.indexOf(currentScale);
+    if (nextIndex != -1) {
       nextIndex += add ? 1 : -1;
     }
 
-    mod.setScaleFactor(scaleValues[nextIndex]);
+    mod.setScaleFactor(scaleValues.get(nextIndex));
 
     updateButtons();
   }
 
   private void updateButtons() {
-    increaseButton.active = Config.getScaleFactor() < scaleValues[scaleValues.length - 1];
-    decreaseButton.active = Config.getScaleFactor() > scaleValues[0];
+    increaseButton.active = Config.getScaleFactor() < scaleValues.get(scaleValues.size() - 1);
+    decreaseButton.active = Config.getScaleFactor() > scaleValues.get(0);
   }
 
   public void setManualEntry(boolean manualEntry, boolean cancel) {
     this.manualEntry = manualEntry;
     if (manualEntry) {
-      entryTextField.setText(String.valueOf(Config.getScaleFactor()));
+      entryTextField.setValue(String.valueOf(Config.getScaleFactor()));
       entryTextField.setVisible(true);
-      entryTextField.setSelectionStart(0);
-      entryTextField.setSelectionEnd(entryTextField.getText().length());
+      entryTextField.setCursorPosition(0);
+      entryTextField.setHighlightPos(entryTextField.getValue().length());
       entryTextField.active = true;
       cancelOrResetButton.setMessage(cancelText);
       increaseButton.active = false;
       decreaseButton.active = false;
-      this.focusOn(entryTextField);
+      super.magicalSpecialHackyFocus(entryTextField);
     } else {
       if (!cancel) {
-        String text = entryTextField.getText();
-        if (NumberUtils.isParsable(text)) {
+        String text = entryTextField.getValue();
+        try {
           float value = Math.abs(Float.parseFloat(text));
           mod.setScaleFactor(value);
+        } catch (NumberFormatException e) {
+          /* Ignore invalid format */
         }
       }
 
